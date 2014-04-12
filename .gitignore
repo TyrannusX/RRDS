@@ -10,5 +10,9 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+<<<<<<< HEAD
 /client/rrdsClient/nbproject/private/
 /client/rrdsClient/build/
+=======
+/server/rrdsServer/nbproject/private/
+>>>>>>> bc7527c81e45e7d6b76053eff73ef619cd9e8e14
