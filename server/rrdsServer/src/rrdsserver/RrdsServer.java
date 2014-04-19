@@ -21,7 +21,7 @@ import org.xml.sax.InputSource;
  *
  * @author robertreyes
  */
-public class RrdsServer {
+public class RrdsServer{
     //class variables
     private static ServerSocket serverSocket; //socket used for accepting connections 
     private static Socket clientSocket; //socket used to hold client socket
@@ -41,8 +41,11 @@ public class RrdsServer {
     
     public static void main(String[] args) {
         String credentialStr = "";
-        String sFormat = "";
+        String sPath = "";
+        String sInbox = "";
         String xmlStr = "";
+        File userPath;
+        File[] userFiles;
         int credentialCounter = 0;
         boolean usernameVerified = false;
         boolean passwordVerified = false;
@@ -102,44 +105,36 @@ public class RrdsServer {
                 {
                     outgoingMessage.printf("welcome %s!\n", username);
                     
-                    //get inbox file and send to client
-                    sFormat = String.format("users/%s/inbox/2014-04-12T14-32-00Z.xml", username);
-                    myFile = new FileReader(sFormat);
-                    bReader = new BufferedReader(myFile);
+                    //get the users inbox folder
+                    sPath = String.format("users/%s/inbox", username);
+                    userPath = new File(sPath);
+                    userFiles = userPath.listFiles();
                     
-                    sFormat = "";
-                    while((xmlStr = bReader.readLine()) != null)
-                    {
-                        sFormat += String.format("%s", xmlStr);
+                    //send client number of files in inbox directory
+                    outgoingMessage.printf("%d", userFiles.length);
+                    
+                    
+                    //send client all inbox files
+                    for(int i = 0; i < userFiles.length; i++){
+                        sInbox = getUserFiles(userFiles[i]);
+                        outgoingMessage.printf("%s", sInbox);
                     }
-                    outgoingMessage.printf("%s\n", sFormat);
                     
-                    bReader.close();
+                    /*get the users sent folder
+                    userPath = new File("users/%s/sent");
+                    userFiles = userPath.listFiles();
+                    for(int i = 0; i < userFiles.length; i++){
+                        sInbox = getUserFiles(userFiles[i]);
+                        outgoingMessage.printf("%s", sInbox);
+                    }
                     
-                    sFormat = "";
-                    
-                    //parse xml file and send parsed string to client                 
-                    sFormat = String.format("users/%s/inbox/2014-04-12T14-32-00Z.xml", username);
-                    File xmlFile = new File(sFormat);
-                    xmlFactory = DocumentBuilderFactory.newInstance();
-                    xmlBuilder = xmlFactory.newDocumentBuilder();
-                    xmlDoc = xmlBuilder.parse(xmlFile);
-                    
-                    xmlDoc.getDocumentElement().normalize();
-                    sFormat = xmlDoc.getElementsByTagName("datetime").item(0).getTextContent();
-                    sFormat += "\n";
-                    sFormat += xmlDoc.getElementsByTagName("to").item(0).getTextContent();
-                    sFormat += "\n";
-                    sFormat += xmlDoc.getElementsByTagName("from").item(0).getTextContent();
-                    sFormat += "\n";
-                    sFormat += xmlDoc.getElementsByTagName("subject").item(0).getTextContent();
-                    sFormat += "\n";
-                    sFormat += xmlDoc.getElementsByTagName("body").item(0).getTextContent();
-                    sFormat += "\n";
-                    
-                    System.out.printf("%s\n", sFormat);
-                    
-                    outgoingMessage.printf("%s", sFormat);
+                    //get the users trash folder
+                    userPath = new File("users/%s/trash");
+                    userFiles = userPath.listFiles();
+                    for(int i = 0; i < userFiles.length; i++){
+                        sInbox = getUserFiles(userFiles[i]);
+                        outgoingMessage.printf("%s", sInbox);
+                    }*/
                 }
                 else
                 {
@@ -150,7 +145,6 @@ public class RrdsServer {
                 usernameVerified = false;
                 passwordVerified = false;
                 credentialStr = "";
-                sFormat = "";
                 
                 //close server socket
                 clientSocket.close();
@@ -161,4 +155,30 @@ public class RrdsServer {
         }
     }
     
+    public static String getUserFiles(File fileName){
+        String sFormat = "";
+        
+        try{
+            //parse xml file and send parsed string to client                 
+            xmlFactory = DocumentBuilderFactory.newInstance();
+            xmlBuilder = xmlFactory.newDocumentBuilder();
+            xmlDoc = xmlBuilder.parse(fileName);
+
+            xmlDoc.getDocumentElement().normalize();
+            sFormat = xmlDoc.getElementsByTagName("datetime").item(0).getTextContent();
+            sFormat += "\n";
+            sFormat += xmlDoc.getElementsByTagName("to").item(0).getTextContent();
+            sFormat += "\n";
+            sFormat += xmlDoc.getElementsByTagName("from").item(0).getTextContent();
+            sFormat += "\n";
+            sFormat += xmlDoc.getElementsByTagName("subject").item(0).getTextContent();
+            sFormat += "\n";
+            sFormat += xmlDoc.getElementsByTagName("body").item(0).getTextContent();
+            sFormat += "\n";
+        }
+        catch(Exception e){
+            System.out.println("Failed to retrieve specified folder");
+        }
+        return sFormat;
+    }
 }
