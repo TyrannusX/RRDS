@@ -1,3 +1,4 @@
+*.DS_Store
 *.class
 
 # Mobile Tools for Java (J2ME)
@@ -16,3 +17,4 @@ hs_err_pid*
 =======
 /server/rrdsServer/nbproject/private/
 >>>>>>> bc7527c81e45e7d6b76053eff73ef619cd9e8e14
+/client/rrdsClient/dist/

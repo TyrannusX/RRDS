@@ -1,27 +1,22 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
+package rrdsclient;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import javax.swing.JOptionPane;
 
 /**
  *
  * @author dariusstephen
  */
-public class LoginFrame extends javax.swing.JFrame {
+public class LoginDialog extends javax.swing.JDialog {
 
     /**
-     * Creates new form frmLogin
+     * Creates new form LoginDialog
      */
-    public LoginFrame() {
+    public LoginDialog(java.awt.Frame parent, boolean modal) {
+        super(parent, modal);
         initComponents();
         lblError.setVisible(false);
     }
@@ -45,9 +40,7 @@ public class LoginFrame extends javax.swing.JFrame {
         btnConnect = new javax.swing.JButton();
         lblError = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jLabel1.setText("RRDS Login");
 
@@ -123,16 +116,16 @@ public class LoginFrame extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(27, 27, 27)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(28, Short.MAX_VALUE))
+                .addGap(15, 15, 15)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(14, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(24, 24, 24)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(37, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -151,62 +144,65 @@ public class LoginFrame extends javax.swing.JFrame {
     private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConnectActionPerformed
         // Establish connection to server
         try {
+            lblError.setVisible(false);
+            
             // Get username and password from login fields
             username = fieldUsername.getText().trim();
             password = new String(fieldPassword.getPassword());
-            
+
             // Check for username and password validity
             if(username.equals("") || password.equals("")) {
                 lblError.setVisible(true);
                 return;
             }
-            
+
             // Open client socket and establish connection
             clientSocket = new Socket(domainName, portNumber);
-            
+
             // Set up BufferedReader and PrintWriter for read and write
             in = new BufferedReader(new InputStreamReader(
-                    clientSocket.getInputStream()));
+                clientSocket.getInputStream()));
             out = new PrintWriter(clientSocket.getOutputStream(),
-                    true);
-            
+                true);
+
             // Send credential to server
             out.println(username + "/" + password);
-            
+
             // Get and check server response for login
             serverResponse = in.readLine();
-            if(serverResponse.equals("INTRUDER ALERT")) {
-                loginValid = false;
-            }
-            else if(serverResponse.equals("welcome " + username + "!")) {
-                loginValid = true;
-            }
-            else {
-                loginValid = false;
-                JOptionPane.showMessageDialog(null, "Please contact the administrator",
-                    "Unexpected response", JOptionPane.ERROR_MESSAGE);
-            }
+            
+            loginValid = (serverResponse.equals("welcome " + username + "!"));
             
             if(!loginValid) {
+                // Login is not valid
+                lblError.setText("Invalid username or password");
                 lblError.setVisible(true);
                 clientSocket.close();
-                return;
             }
-            
-            serverResponse = in.readLine();
-            JOptionPane.showMessageDialog(null, serverResponse,
-                    "Server Response", JOptionPane.INFORMATION_MESSAGE);
-            
-            serverResponse = in.readLine();
-            JOptionPane.showMessageDialog(null, serverResponse,
-                    "Server Response", JOptionPane.INFORMATION_MESSAGE);
-            clientSocket.close();
+            else {
+                // Login is valid, hence dispose login dialog
+                this.dispose();
+            }
         }
         catch (IOException e) {
             System.out.println(e);
+            lblError.setText("Connection failed. Server might be inactive.");
+            lblError.setVisible(true);
         }
     }//GEN-LAST:event_btnConnectActionPerformed
-
+    
+    public Socket getSocket() {
+        return (loginValid) ? clientSocket : null;
+    }
+    
+    public BufferedReader getBufferedReader() {
+        return (loginValid) ? in : null;
+    }
+    
+    public PrintWriter getPrintWriter() {
+        return (loginValid) ? out : null;
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -224,20 +220,27 @@ public class LoginFrame extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(LoginFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(LoginDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(LoginFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(LoginDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(LoginFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(LoginDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(LoginFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(LoginDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
-        /* Create and display the form */
+        /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new LoginFrame().setVisible(true);
+                LoginDialog dialog = new LoginDialog(new javax.swing.JFrame(), true);
+                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
+                    public void windowClosing(java.awt.event.WindowEvent e) {
+                        System.exit(0);
+                    }
+                });
+                dialog.setVisible(true);
             }
         });
     }
