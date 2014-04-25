@@ -39,7 +39,6 @@ public class HomeFrame extends javax.swing.JFrame {
         tbHome.setRollover(true);
 
         btnNew.setFont(new java.awt.Font("Lucida Grande", 0, 14)); // NOI18N
-        btnNew.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rrdsclient/msg.png"))); // NOI18N
         btnNew.setText("New");
         btnNew.setFocusable(false);
         btnNew.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);

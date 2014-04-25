@@ -33,27 +33,28 @@ public class RrdsClient {
             // 1. Inbox
             // 2. Sent
             // 3. Trash
-            for(int i = 0; i < fileNum.length; i++) {
-                fileNum[i] = Integer.parseInt(in.readLine());
-            }
+//            for(int i = 0; i < fileNum.length; i++) {
+//                fileNum[i] = Integer.parseInt(in.readLine());
+//            }
             
             hframe = new HomeFrame();
             hframe.setDefaultCloseOperation(HomeFrame.DISPOSE_ON_CLOSE);
             
-            try {
-                for(int x = 0; x < fileNum.length; x++) {
-                    for(int y = 0; y < fileNum[x]; y++) {
-                        serverResponse = in.readLine();
-                        JOptionPane.showMessageDialog(null,
-                            serverResponse);
-                    }
-                }
-            }
-            catch(IOException e) {
-                System.out.println(e);
-            }
+//            try {
+//                for(int x = 0; x < fileNum.length; x++) {
+//                    for(int y = 0; y < fileNum[x]; y++) {
+//                        serverResponse = in.readLine();
+//                        JOptionPane.showMessageDialog(null,
+//                            serverResponse);
+//                    }
+//                }
+//            }
+//            catch(IOException e) {
+//                System.out.println(e);
+//            }
             
             hframe.setVisible(true);
         }
     } // end main
 }
+

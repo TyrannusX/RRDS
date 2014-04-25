@@ -133,7 +133,7 @@ public class LoginDialog extends javax.swing.JDialog {
 
     private static Socket clientSocket;
     private static final String domainName = "penguin.tamucc.edu";
-    private static final int portNumber = 8080;
+    private static final int portNumber = 9000;
     private static BufferedReader in;
     private static PrintWriter out;
     private static String serverResponse;
