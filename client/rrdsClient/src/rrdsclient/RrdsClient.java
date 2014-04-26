@@ -1,4 +1,4 @@
-package rrdsclient;
+//package rrdsclient;
 
 import java.io.*;
 import java.net.Socket;
@@ -37,7 +37,7 @@ public class RrdsClient {
 //                fileNum[i] = Integer.parseInt(in.readLine());
 //            }
             
-            hframe = new HomeFrame();
+            hframe = new HomeFrame(clientSocket);
             hframe.setDefaultCloseOperation(HomeFrame.DISPOSE_ON_CLOSE);
             
 //            try {

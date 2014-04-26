@@ -1,4 +1,4 @@
-package rrdsclient;
+//package rrdsclient;
 
 import java.io.BufferedReader;
 import java.io.IOException;

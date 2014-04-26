@@ -8,8 +8,12 @@
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.net.Socket;
@@ -36,6 +40,10 @@ public class ClientThread extends Thread{
     private InputSource xmlSource; //xml source
     private StringReader xmlReader; //xml reader
     private Document xmlDoc; //xml document
+    private FileOutputStream serializeOutputStream;
+    private FileInputStream serializeInputStream;
+    private ObjectOutputStream serializeObjectOutputStream;
+    private ObjectInputStream serializeObjectInputStream;
 
     public ClientThread(Socket socketIn){
         thrdSocket = socketIn;
@@ -128,8 +136,11 @@ public class ClientThread extends Thread{
                sPath = String.format("users/%s/trash", username);
                trash = new File(sPath);
                
+               System.out.println("initial read thread");
                tempStr = incomingMessage.readLine();
+               System.out.println("initial read thread complete");
                while(!tempStr.equals("exit")){
+                   System.out.printf("request = %s", tempStr);
                    //if request is for inbox files
                    if(tempStr.equals("getinbox")){
                        //send all inbox files to client
@@ -154,6 +165,7 @@ public class ClientThread extends Thread{
                            
                        }
                    }
+                   tempStr = incomingMessage.readLine();
                }
            }
            else
@@ -162,6 +174,9 @@ public class ClientThread extends Thread{
            }
         }
         catch(Exception e){
+            if(thrdSocket == null){
+                System.out.println("the socket is null");
+            }
             System.out.println("Thread failed");
         }
     }

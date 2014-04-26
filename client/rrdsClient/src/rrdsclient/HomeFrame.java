@@ -1,17 +1,34 @@
-package rrdsclient;
+
+import java.net.*;
+import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+//package rrdsclient;
 
 /**
  *
  * @author dariusstephen
  */
 public class HomeFrame extends javax.swing.JFrame {
+    private Socket socket;
+    private BufferedReader in;
+    private PrintWriter out;
 
     /**
      * Creates new form HomeFrame
      */
 
-    public HomeFrame() {
-        initComponents();
+    public HomeFrame(Socket socketIn) {
+        try {
+            socket = socketIn;
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            out = new PrintWriter(socket.getOutputStream(), true);
+            initComponents();          
+        } 
+        catch (Exception e) {
+            System.out.println("inithome failed");
+        }
     }
 
     /**
@@ -61,6 +78,11 @@ public class HomeFrame extends javax.swing.JFrame {
             String[] strings = { "Inbox", "Sent", "Trash" };
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
+        });
+        listOption.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                listOptionMouseClicked(evt);
+            }
         });
         spLeft.setViewportView(listOption);
 
@@ -114,15 +136,30 @@ public class HomeFrame extends javax.swing.JFrame {
         lblTest.setText(haha);
     }//GEN-LAST:event_btnNewActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
+    private void listOptionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_listOptionMouseClicked
+        int currentIndex = listOption.getSelectedIndex();
+        
+        out.println("derpderpreq");
+        System.out.println("CLICK");
+        
+        switch(currentIndex){
+            case 0:
+                out.println("getinbox");
+                break;
+            case 1:
+                out.println("getsent");
+                break;
+            case 2:
+                out.println("gettrash");
+                break;
+            default:
+                out.println("noreq");
+                break;
+        }
+    }//GEN-LAST:event_listOptionMouseClicked
+
+    /*
+    public static void main(String args[]) {     
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -141,13 +178,12 @@ public class HomeFrame extends javax.swing.JFrame {
         }
         //</editor-fold>
 
-        /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new HomeFrame().setVisible(true);
             }
         });
-    }
+    }*/
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnNew;

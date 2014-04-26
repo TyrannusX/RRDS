@@ -6,6 +6,7 @@
 
 //package rrdsserver;
 
+//http://www.tutorialspoint.com/java/java_serialization.htm
 import java.io.*;
 import java.net.*;
 import java.util.StringTokenizer;
@@ -30,18 +31,19 @@ public class RrdsServer{
     public static void main(String[] args) {    
         try{
             //initialize the server socket
-            serverSocket = new ServerSocket(8080);
+            serverSocket = new ServerSocket(9000);
 
             //while loop to run server
             while(true){
+                System.out.println("Server loop start");
                 //accept incoming connections
                 clientSocket = serverSocket.accept();
                 
                 acceptThread = new ClientThread(clientSocket);
-                acceptThread.run();
+                acceptThread.start();
                 
                 //close server socket
-                clientSocket.close();
+                System.out.println("Server loop end");
             }
         }
         catch(Exception e){
