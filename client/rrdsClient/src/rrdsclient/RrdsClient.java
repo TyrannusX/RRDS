@@ -1,4 +1,4 @@
-//package rrdsclient;
+package rrdsclient;
 
 import java.io.*;
 import java.net.Socket;
@@ -29,30 +29,8 @@ public class RrdsClient {
             JOptionPane.showMessageDialog(null,
                 "You have successfully logged in!");
             
-            // Try getting the number of messages inside
-            // 1. Inbox
-            // 2. Sent
-            // 3. Trash
-//            for(int i = 0; i < fileNum.length; i++) {
-//                fileNum[i] = Integer.parseInt(in.readLine());
-//            }
-            
             hframe = new HomeFrame(clientSocket);
             hframe.setDefaultCloseOperation(HomeFrame.DISPOSE_ON_CLOSE);
-            
-//            try {
-//                for(int x = 0; x < fileNum.length; x++) {
-//                    for(int y = 0; y < fileNum[x]; y++) {
-//                        serverResponse = in.readLine();
-//                        JOptionPane.showMessageDialog(null,
-//                            serverResponse);
-//                    }
-//                }
-//            }
-//            catch(IOException e) {
-//                System.out.println(e);
-//            }
-            
             hframe.setVisible(true);
         }
     } // end main

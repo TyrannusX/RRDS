@@ -145,8 +145,9 @@ public class ClientThread extends Thread{
                    if(tempStr.equals("getinbox")){
                        //send all inbox files to client
                        inboxFiles = inbox.listFiles();
+		       outgoingMessage.printf("%d\n", inboxFiles.length);
                        for(int i = 0; i < inboxFiles.length; i++){
-                           
+                           outgoingMessage.printf("%s", getRequestedFile(inboxFiles[i]));
                        }
                    }
                    //if request is for sent files
