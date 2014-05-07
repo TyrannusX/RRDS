@@ -1,4 +1,4 @@
-package rrdsclient;
+//package rrdsclient;
 
 import java.io.*;
 import java.net.Socket;

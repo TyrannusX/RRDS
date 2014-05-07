@@ -1,4 +1,4 @@
-package rrdsclient;
+//package rrdsclient;
 
 import java.io.*;
 import java.net.*;
@@ -6,6 +6,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
@@ -47,7 +48,6 @@ public class HomeFrame extends javax.swing.JFrame {
         }
     }
     private void hideLabels() {
-        lblSender.setText("");
         lblFrom.setText("");
         lblTo.setText("");
         lblSubject.setText("");
@@ -71,21 +71,25 @@ public class HomeFrame extends javax.swing.JFrame {
 
         jSeparator2 = new javax.swing.JSeparator();
         tbHome = new javax.swing.JToolBar();
-        btnNew = new javax.swing.JButton();
-        lblTest = new javax.swing.JLabel();
+        btnCompose = new javax.swing.JButton();
         panelHome = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         listFolder = new javax.swing.JList();
         spSubject = new javax.swing.JScrollPane();
         listSubject = new javax.swing.JList();
         panelContent = new javax.swing.JPanel();
-        lblSender = new javax.swing.JLabel();
         lblFrom = new javax.swing.JLabel();
         lblTo = new javax.swing.JLabel();
         lblSubject = new javax.swing.JLabel();
         lblDate = new javax.swing.JLabel();
-        jSeparator1 = new javax.swing.JSeparator();
         lblBody = new javax.swing.JLabel();
+        dateTextField = new javax.swing.JTextField();
+        toTextField = new javax.swing.JTextField();
+        fromTextField = new javax.swing.JTextField();
+        subjectTextField = new javax.swing.JTextField();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        bodyTextArea = new javax.swing.JTextArea();
+        sendButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(45, 51, 56));
@@ -93,21 +97,17 @@ public class HomeFrame extends javax.swing.JFrame {
 
         tbHome.setRollover(true);
 
-        btnNew.setFont(new java.awt.Font("Lucida Grande", 0, 14)); // NOI18N
-        btnNew.setText("New");
-        btnNew.setFocusable(false);
-        btnNew.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnNew.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        btnNew.addActionListener(new java.awt.event.ActionListener() {
+        btnCompose.setFont(new java.awt.Font("Lucida Grande", 0, 14)); // NOI18N
+        btnCompose.setText("Compose");
+        btnCompose.setFocusable(false);
+        btnCompose.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnCompose.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnCompose.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnNewActionPerformed(evt);
+                btnComposeActionPerformed(evt);
             }
         });
-        tbHome.add(btnNew);
-
-        lblTest.setText("Test");
-        tbHome.add(lblTest);
-        lblTest.getAccessibleContext().setAccessibleName("lblTest");
+        tbHome.add(btnCompose);
 
         listFolder.setModel(new javax.swing.AbstractListModel() {
             String[] strings = { "Inbox", "Sent", "Trash" };
@@ -121,26 +121,44 @@ public class HomeFrame extends javax.swing.JFrame {
         });
         jScrollPane3.setViewportView(listFolder);
 
+        listSubject.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                listSubjectMouseClicked(evt);
+            }
+        });
         spSubject.setViewportView(listSubject);
 
         panelContent.setBackground(new java.awt.Color(255, 255, 255));
         panelContent.setForeground(new java.awt.Color(255, 255, 255));
 
-        lblSender.setFont(new java.awt.Font("Lucida Grande", 1, 14)); // NOI18N
-        lblSender.setText("<sender>");
-
         lblFrom.setFont(new java.awt.Font("Lucida Grande", 0, 12)); // NOI18N
-        lblFrom.setText("<from>");
+        lblFrom.setText("From");
 
         lblTo.setFont(new java.awt.Font("Lucida Grande", 0, 12)); // NOI18N
-        lblTo.setText("<to>");
+        lblTo.setText("To");
 
-        lblSubject.setFont(new java.awt.Font("Lucida Grande", 1, 15)); // NOI18N
-        lblSubject.setText("<Subject>");
+        lblSubject.setText("Subject");
 
-        lblDate.setText("<date>");
+        lblDate.setText("Date");
 
-        lblBody.setText("<body>");
+        lblBody.setText("Body");
+
+        subjectTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                subjectTextFieldActionPerformed(evt);
+            }
+        });
+
+        bodyTextArea.setColumns(20);
+        bodyTextArea.setRows(5);
+        jScrollPane1.setViewportView(bodyTextArea);
+
+        sendButton.setText("Send");
+        sendButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                sendButtonActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout panelContentLayout = new javax.swing.GroupLayout(panelContent);
         panelContent.setLayout(panelContentLayout);
@@ -149,38 +167,56 @@ public class HomeFrame extends javax.swing.JFrame {
             .addGroup(panelContentLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(panelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSeparator1)
                     .addGroup(panelContentLayout.createSequentialGroup()
                         .addGroup(panelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblFrom)
-                            .addComponent(lblSubject)
-                            .addComponent(lblBody))
-                        .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(jScrollPane1)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelContentLayout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(sendButton)))
+                        .addContainerGap())
                     .addGroup(panelContentLayout.createSequentialGroup()
-                        .addComponent(lblSender)
-                        .addGap(18, 18, 18)
-                        .addComponent(lblTo)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(lblDate)))
-                .addContainerGap())
+                        .addGroup(panelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(lblDate, javax.swing.GroupLayout.DEFAULT_SIZE, 58, Short.MAX_VALUE)
+                            .addComponent(lblTo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(panelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(dateTextField)
+                            .addComponent(toTextField)))
+                    .addGroup(panelContentLayout.createSequentialGroup()
+                        .addGroup(panelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(lblBody, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(lblFrom, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(lblSubject, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 58, Short.MAX_VALUE))
+                        .addGap(6, 6, 6)
+                        .addGroup(panelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(fromTextField)
+                            .addComponent(subjectTextField)))))
         );
         panelContentLayout.setVerticalGroup(
             panelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelContentLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(panelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblSender)
-                    .addComponent(lblTo)
-                    .addComponent(lblDate))
-                .addGap(5, 5, 5)
-                .addComponent(lblFrom)
+                    .addComponent(lblDate)
+                    .addComponent(dateTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblSubject)
-                .addGap(5, 5, 5)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(panelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblTo)
+                    .addComponent(toTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(2, 2, 2)
+                .addGroup(panelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblFrom)
+                    .addComponent(fromTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblSubject)
+                    .addComponent(subjectTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblBody)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(sendButton))
         );
 
         javax.swing.GroupLayout panelHomeLayout = new javax.swing.GroupLayout(panelHome);
@@ -200,8 +236,10 @@ public class HomeFrame extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelHomeLayout.createSequentialGroup()
                 .addGroup(panelHomeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(spSubject, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(panelContent, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 349, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, panelHomeLayout.createSequentialGroup()
+                        .addGap(34, 34, 34)
+                        .addComponent(panelContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.LEADING))
                 .addContainerGap())
         );
 
@@ -213,7 +251,7 @@ public class HomeFrame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(tbHome, javax.swing.GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE)
+                        .addComponent(tbHome, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
                         .addGap(561, 561, 561))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(panelHome, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -231,11 +269,6 @@ public class HomeFrame extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void btnNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewActionPerformed
-        String haha = btnNew.getText();
-        lblTest.setText(haha);
-    }//GEN-LAST:event_btnNewActionPerformed
 
     private void listFolderMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_listFolderMouseClicked
         // TODO add your handling code here:
@@ -316,6 +349,61 @@ public class HomeFrame extends javax.swing.JFrame {
         listSubject.setModel(listModel);
     }//GEN-LAST:event_listFolderMouseClicked
 
+    private void listSubjectMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_listSubjectMouseClicked
+        String selectedMessage = listSubject.getSelectedValue().toString();
+        StringTokenizer splitter; //tokenizer
+        
+        dateTextField.setText("");
+        toTextField.setText("");
+        fromTextField.setText("");
+        subjectTextField.setText("");
+        bodyTextArea.setText("");
+        sendButton.setEnabled(false);
+        
+        String[] ditchHtml = selectedMessage.split("<html>");
+        String[] splitted = ditchHtml[1].split("<br>");
+        
+        bodyTextArea.setText(selectedMessage);
+        
+        for(int i = 0; i < 5; i++)
+        {
+            switch(i){
+                case 0:
+                    dateTextField.setText(splitted[i]);
+                    break;
+                case 1:
+                    toTextField.setText(splitted[i]);
+                    break;
+                case 2:
+                    fromTextField.setText(splitted[i]);
+                    break;    
+                case 3:
+                    subjectTextField.setText(splitted[i]);
+                    break;
+                case 4:
+                    bodyTextArea.setText(splitted[i]);
+                    break;    
+            }
+        }
+    }//GEN-LAST:event_listSubjectMouseClicked
+
+    private void btnComposeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnComposeActionPerformed
+        dateTextField.setText("");
+        toTextField.setText("");
+        fromTextField.setText("");
+        subjectTextField.setText("");
+        bodyTextArea.setText("");
+        sendButton.setEnabled(true);
+    }//GEN-LAST:event_btnComposeActionPerformed
+
+    private void subjectTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_subjectTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_subjectTextFieldActionPerformed
+
+    private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_sendButtonActionPerformed
+
     /*
     public static void main(String args[]) {     
         try {
@@ -344,22 +432,26 @@ public class HomeFrame extends javax.swing.JFrame {
     }*/
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnNew;
+    private javax.swing.JTextArea bodyTextArea;
+    private javax.swing.JButton btnCompose;
+    private javax.swing.JTextField dateTextField;
+    private javax.swing.JTextField fromTextField;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JLabel lblBody;
     private javax.swing.JLabel lblDate;
     private javax.swing.JLabel lblFrom;
-    private javax.swing.JLabel lblSender;
     private javax.swing.JLabel lblSubject;
-    private javax.swing.JLabel lblTest;
     private javax.swing.JLabel lblTo;
     private javax.swing.JList listFolder;
     private javax.swing.JList listSubject;
     private javax.swing.JPanel panelContent;
     private javax.swing.JPanel panelHome;
+    private javax.swing.JButton sendButton;
     private javax.swing.JScrollPane spSubject;
+    private javax.swing.JTextField subjectTextField;
     private javax.swing.JToolBar tbHome;
+    private javax.swing.JTextField toTextField;
     // End of variables declaration//GEN-END:variables
 }

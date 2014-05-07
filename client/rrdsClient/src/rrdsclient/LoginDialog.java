@@ -1,4 +1,4 @@
-package rrdsclient;
+//package rrdsclient;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -133,7 +133,7 @@ public class LoginDialog extends javax.swing.JDialog {
 
     private static Socket clientSocket;
     private static final String domainName = "localhost";
-    private static final int portNumber = 9000;
+    private static final int portNumber = 9999;
     private static BufferedReader in;
     private static PrintWriter out;
     private static String serverResponse;

@@ -19,3 +19,4 @@ hs_err_pid*
 >>>>>>> bc7527c81e45e7d6b76053eff73ef619cd9e8e14
 /client/rrdsClient/dist/
 /server/rrdsServer/build/
+/server/rrdsServer/dist/

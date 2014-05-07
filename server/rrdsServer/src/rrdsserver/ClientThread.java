@@ -9,15 +9,19 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.net.Socket;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
@@ -32,6 +36,7 @@ public class ClientThread extends Thread{
     private Socket thrdSocket;
     private BufferedReader incomingMessage; //input stream to get client data
     private PrintWriter outgoingMessage; //output stream to client
+    private PrintWriter writeClientMessage;
     private StringTokenizer splitter; //tokenizer
     private FileReader myFile; //file reader to read in credentials, inbox, outbox, etc
     private Element xmlElement; //xml element
@@ -72,6 +77,7 @@ public class ClientThread extends Thread{
         String sInbox = "";
         String sSent = "";
         String sTrash = "";
+        String sClientMessage = "";
         
         try{
         
@@ -136,13 +142,10 @@ public class ClientThread extends Thread{
                sPath = String.format("users/%s/trash", username);
                trash = new File(sPath);
                
-               System.out.println("initial read thread");
                tempStr = incomingMessage.readLine();
-               System.out.println("initial read thread complete");
                while(!tempStr.equals("exit")){
-                   System.out.printf("request = %s", tempStr);
                    //if request is for inbox files
-                   if(tempStr.equals("getinbox")){
+                   if(tempStr.equals("getinbox")){                     
                        //send all inbox files to client
                        inboxFiles = inbox.listFiles();
 		       outgoingMessage.printf("%d\n", inboxFiles.length);
@@ -154,17 +157,24 @@ public class ClientThread extends Thread{
                    else if(tempStr.equals("getsent")){
                        //send all sent files to client
                        sentFiles = sent.listFiles();
+                       outgoingMessage.printf("%d\n", sentFiles.length);
                        for(int i = 0; i < sentFiles.length; i++){
-                           
+                           outgoingMessage.printf("%s", getRequestedFile(sentFiles[i]));
                        }
                    }
                    //if request is for trash files
                    else if(tempStr.equals("gettrash")){
                        //send all trash files to client
                        trashFiles = trash.listFiles();
+                       outgoingMessage.printf("%d\n", trashFiles.length);
                        for(int i = 0; i < trashFiles.length; i++){
-                           
+                           outgoingMessage.printf("%s", getRequestedFile(trashFiles[i]));
                        }
+                   }
+                   //push message to server
+                   else{
+                       sClientMessage = incomingMessage.readLine();
+                       pushMessage(sClientMessage, username);
                    }
                    tempStr = incomingMessage.readLine();
                }
@@ -207,5 +217,18 @@ public class ClientThread extends Thread{
             System.out.println("Failed to retrieve specified folder");
         }
         return sFormat;
+    }
+    
+    public void pushMessage(String clientMessageIn, String username){               
+        try {
+            String sPath = String.format("users/%s/sent/newfile.xml", username);
+            File tempFile = new File(sPath);
+            writeClientMessage = new PrintWriter(tempFile);
+            writeClientMessage.printf("%s", clientMessageIn);
+            writeClientMessage.close();
+        } 
+        catch (FileNotFoundException ex) {
+            Logger.getLogger(ClientThread.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

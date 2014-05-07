@@ -31,7 +31,7 @@ public class RrdsServer{
     public static void main(String[] args) {    
         try{
             //initialize the server socket
-            serverSocket = new ServerSocket(9000);
+            serverSocket = new ServerSocket(9999);
 
             //while loop to run server
             while(true){
