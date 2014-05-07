@@ -393,7 +393,7 @@ public class HomeFrame extends javax.swing.JFrame {
         fromTextField.setText("");
         subjectTextField.setText("");
         bodyTextArea.setText("");
-        sendButton.setEnabled(true);
+        sendButton.setEnabled(true);                
     }//GEN-LAST:event_btnComposeActionPerformed
 
     private void subjectTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_subjectTextFieldActionPerformed
@@ -401,7 +401,38 @@ public class HomeFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_subjectTextFieldActionPerformed
 
     private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendButtonActionPerformed
-        // TODO add your handling code here:
+        String date = dateTextField.getText();
+        String to = toTextField.getText();
+        String from = fromTextField.getText();
+        String subject = subjectTextField.getText();
+        String body = bodyTextArea.getText();
+        String messagePassing = "";
+        
+        if(date.equals("") || to.equals("") || from.equals("") || subject.equals("") || body.equals("")){
+            System.out.println("missing field");
+        }
+        else{
+            messagePassing += date;
+            messagePassing += "<br>";
+            messagePassing += to;
+            messagePassing += "<br>";
+            messagePassing += from;
+            messagePassing += "<br>";
+            messagePassing += subject;
+            messagePassing += "<br>";
+            messagePassing += body;
+            
+            messagePassing += "<pushfile>";
+            
+            out.printf("%s", messagePassing);
+            
+            dateTextField.setText("");
+            toTextField.setText("");
+            fromTextField.setText("");
+            subjectTextField.setText("");
+            bodyTextArea.setText("");
+            sendButton.setEnabled(true);
+        }
     }//GEN-LAST:event_sendButtonActionPerformed
 
     /*

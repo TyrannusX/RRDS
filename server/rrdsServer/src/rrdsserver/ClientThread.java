@@ -98,6 +98,8 @@ public class ClientThread extends Thread{
            //setup file stream to verify credentials
            myFile = new FileReader("credentials.txt");
            BufferedReader bReader = new BufferedReader(myFile);
+           String[] credentialArr;
+           int passIndex = 0;
 
            //loop through the file to get credentials and verify
            while((credentialStr = bReader.readLine()) != null)
@@ -105,15 +107,21 @@ public class ClientThread extends Thread{
                //check the user name
                if(credentialCounter == 0)
                {
-                   if(username.equals(credentialStr))
-                   {
-                       usernameVerified = true;
-                   }                       
+                   credentialArr = credentialStr.split(" ");
+                   for(int i = 0; i < credentialArr.length; i++){
+                        if(username.equals(credentialArr[i]))
+                        {
+                            usernameVerified = true;
+                            passIndex = i;
+                            break;
+                        }
+                   }
                }
                //check the password
                else if(credentialCounter == 1)
                {
-                   if(password.equals(credentialStr))
+                   credentialArr = credentialStr.split(" ");
+                   if(password.equals(credentialArr[passIndex]))
                    {
                        passwordVerified = true;
                    }
@@ -172,8 +180,10 @@ public class ClientThread extends Thread{
                        }
                    }
                    //push message to server
-                   else{
-                       sClientMessage = incomingMessage.readLine();
+                   else if(tempStr.contains("<pushfile>")){
+                       String[] clientArray = tempStr.split("<pushfile>");
+                       sClientMessage = clientArray[0];
+                       System.out.printf("message = %s\n", sClientMessage);
                        pushMessage(sClientMessage, username);
                    }
                    tempStr = incomingMessage.readLine();
@@ -219,13 +229,56 @@ public class ClientThread extends Thread{
         return sFormat;
     }
     
-    public void pushMessage(String clientMessageIn, String username){               
+    public void pushMessage(String clientMessageIn, String username){
+        String sXml = ""; 
         try {
-            String sPath = String.format("users/%s/sent/newfile.xml", username);
+            String[] splitMessage = clientMessageIn.split("<br>");
+            
+            sXml += "<xml>\n";
+            for(int i = 0; i < 5; i++){
+                switch(i){
+                    case 0:
+                        sXml += "\t<datetime>";
+                        sXml += splitMessage[i];
+                        sXml += "</datetime>\n";
+                        break;
+                    case 1:
+                        sXml += "\t<to>";
+                        sXml += splitMessage[i];
+                        sXml += "</to>\n";
+                        break;
+                    case 2:
+                        sXml += "\t<from>";
+                        sXml += splitMessage[i];
+                        sXml += "</from>\n";
+                        break;    
+                    case 3:
+                        sXml += "\t<subject>";
+                        sXml += splitMessage[i];
+                        sXml += "</subject>\n";
+                        break;
+                    case 4:
+                        sXml += "\t<body>";
+                        sXml += splitMessage[i];
+                        sXml += "</body>\n";
+                        break;    
+                }                                             
+            }
+            sXml += "</xml>\n";
+            
+            String sPath = String.format("users/%s/sent/%s.xml", username, splitMessage[0]);
             File tempFile = new File(sPath);
             writeClientMessage = new PrintWriter(tempFile);
-            writeClientMessage.printf("%s", clientMessageIn);
+            writeClientMessage.printf("%s", sXml);
             writeClientMessage.close();
+            
+            sPath = String.format("users/%s/inbox/%s.xml", splitMessage[1], splitMessage[0]);
+            tempFile = new File(sPath);
+            writeClientMessage = new PrintWriter(tempFile);
+            writeClientMessage.printf("%s", sXml);
+            writeClientMessage.close();
+            
+            System.out.println("done writing file");
         } 
         catch (FileNotFoundException ex) {
             Logger.getLogger(ClientThread.class.getName()).log(Level.SEVERE, null, ex);
