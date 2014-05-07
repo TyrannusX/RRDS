@@ -150,7 +150,9 @@ public class ClientThread extends Thread{
                sPath = String.format("users/%s/trash", username);
                trash = new File(sPath);
                
+               System.out.println("waiting for client . . .");
                tempStr = incomingMessage.readLine();
+               System.out.printf("request = %s", tempStr);
                while(!tempStr.equals("exit")){
                    //if request is for inbox files
                    if(tempStr.equals("getinbox")){                     
@@ -183,10 +185,23 @@ public class ClientThread extends Thread{
                    else if(tempStr.contains("<pushfile>")){
                        String[] clientArray = tempStr.split("<pushfile>");
                        sClientMessage = clientArray[0];
-                       System.out.printf("message = %s\n", sClientMessage);
                        pushMessage(sClientMessage, username);
                    }
+                   //delete file from server
+                   else if(tempStr.contains("<deletefileinbox>")){
+                       String[] clientArray = tempStr.split("<deletefileinbox>");
+                       sClientMessage = clientArray[0];
+                       deleteFileFromInbox(sClientMessage, username);
+                   }
+                   else if(tempStr.contains("<deletefilesent>")){
+                       String[] clientArray = tempStr.split("<deletefilesent>");
+                       sClientMessage = clientArray[0];
+                       deleteFileFromSent(sClientMessage, username);
+                   }
+                   
+                   System.out.println("waiting for client . . .");
                    tempStr = incomingMessage.readLine();
+                   System.out.printf("request = %s", tempStr);
                }
            }
            else
@@ -283,5 +298,17 @@ public class ClientThread extends Thread{
         catch (FileNotFoundException ex) {
             Logger.getLogger(ClientThread.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    public void deleteFileFromInbox(String clientMessageIn, String username){
+        String sPath = String.format("users/%s/inbox/%s", username, clientMessageIn);
+        File tempFile = new File(sPath);
+        tempFile.delete();
+    }
+    
+    public void deleteFileFromSent(String clientMessageIn, String username){
+        String sPath = String.format("users/%s/sent/%s", username, clientMessageIn);
+        File tempFile = new File(sPath);
+        tempFile.delete();
     }
 }

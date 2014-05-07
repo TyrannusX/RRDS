@@ -5,8 +5,10 @@ import java.net.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.StringTokenizer;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
@@ -28,20 +30,26 @@ public class HomeFrame extends javax.swing.JFrame {
     private StringBuilder sb;
     private Date emaildate;
     private DefaultListModel listModel;
+    private String username;
+    private boolean isInInbox;
+    private boolean isInSent;
     
     /**
      * Creates new form HomeFrame
      * @param socketIn
      */
     
-    public HomeFrame(Socket socketIn) {
+    public HomeFrame(Socket socketIn, String usernameIn) {
         try {
             socket = socketIn;
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
             initComponents();
-            hideLabels();
             initVariables();
+            username = usernameIn;
+            replyButton.setEnabled(false);
+            sendButton.setEnabled(false);
+            deleteButton.setEnabled(false);
         } 
         catch (IOException e) {
             System.out.println("inithome failed");
@@ -58,6 +66,8 @@ public class HomeFrame extends javax.swing.JFrame {
     private void initVariables() {
         df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
         sf = new SimpleDateFormat("mm/dd/yy HH:mm");
+        isInInbox = false;
+        isInSent = false;
     }
     
     /**
@@ -71,7 +81,6 @@ public class HomeFrame extends javax.swing.JFrame {
 
         jSeparator2 = new javax.swing.JSeparator();
         tbHome = new javax.swing.JToolBar();
-        btnCompose = new javax.swing.JButton();
         panelHome = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         listFolder = new javax.swing.JList();
@@ -90,24 +99,15 @@ public class HomeFrame extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         bodyTextArea = new javax.swing.JTextArea();
         sendButton = new javax.swing.JButton();
+        replyButton = new javax.swing.JButton();
+        btnCompose = new javax.swing.JButton();
+        deleteButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(45, 51, 56));
         setMinimumSize(new java.awt.Dimension(670, 450));
 
         tbHome.setRollover(true);
-
-        btnCompose.setFont(new java.awt.Font("Lucida Grande", 0, 14)); // NOI18N
-        btnCompose.setText("Compose");
-        btnCompose.setFocusable(false);
-        btnCompose.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnCompose.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        btnCompose.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnComposeActionPerformed(evt);
-            }
-        });
-        tbHome.add(btnCompose);
 
         listFolder.setModel(new javax.swing.AbstractListModel() {
             String[] strings = { "Inbox", "Sent", "Trash" };
@@ -160,6 +160,31 @@ public class HomeFrame extends javax.swing.JFrame {
             }
         });
 
+        replyButton.setText("Reply");
+        replyButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                replyButtonActionPerformed(evt);
+            }
+        });
+
+        btnCompose.setFont(new java.awt.Font("Lucida Grande", 0, 14)); // NOI18N
+        btnCompose.setText("Compose");
+        btnCompose.setFocusable(false);
+        btnCompose.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnCompose.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnCompose.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnComposeActionPerformed(evt);
+            }
+        });
+
+        deleteButton.setText("Delete");
+        deleteButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelContentLayout = new javax.swing.GroupLayout(panelContent);
         panelContent.setLayout(panelContentLayout);
         panelContentLayout.setHorizontalGroup(
@@ -169,9 +194,15 @@ public class HomeFrame extends javax.swing.JFrame {
                 .addGroup(panelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelContentLayout.createSequentialGroup()
                         .addGroup(panelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 444, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelContentLayout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(deleteButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnCompose)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(replyButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(sendButton)))
                         .addContainerGap())
                     .addGroup(panelContentLayout.createSequentialGroup()
@@ -216,7 +247,11 @@ public class HomeFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(sendButton))
+                .addGroup(panelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(sendButton)
+                    .addComponent(replyButton)
+                    .addComponent(btnCompose)
+                    .addComponent(deleteButton)))
         );
 
         javax.swing.GroupLayout panelHomeLayout = new javax.swing.GroupLayout(panelHome);
@@ -277,9 +312,13 @@ public class HomeFrame extends javax.swing.JFrame {
         switch(currentIndex) {
             case 0:
                 out.println("getinbox");
+                isInInbox = true;
+                isInSent = false;
                 break;
             case 1:
                 out.println("getsent");
+                isInInbox = false;
+                isInSent = true;
                 break;
             case 2:
                 out.println("gettrash");
@@ -307,19 +346,20 @@ public class HomeFrame extends javax.swing.JFrame {
                 sb.append("<html>");
                 // Get the datetime of message
                 response = in.readLine();
-                try {
+                sb.append(response);
+                /*try {
                     emaildate = df.parse(response);
                     sb.append(emaildate.toString());
                 } catch (ParseException ex) {
                     Logger.getLogger(HomeFrame.class.getName())
                             .log(Level.SEVERE, null, ex);
-                }
+                }*/
                 sb.append("<br>");
                 
                 // Get the 'to' field of the message
                 response = in.readLine();
                 sb.append(response);
-                sb.append("<br>");
+                sb.append("<br>");               
 
                 // Get the 'from' field of the message
                 response = in.readLine();
@@ -335,6 +375,7 @@ public class HomeFrame extends javax.swing.JFrame {
                 response = in.readLine();
                 sb.append(response);
                 sb.append("<br>");
+                sb.append("<hr>");
                 sb.append("</html>");
             }
             catch (IOException e) {
@@ -359,6 +400,8 @@ public class HomeFrame extends javax.swing.JFrame {
         subjectTextField.setText("");
         bodyTextArea.setText("");
         sendButton.setEnabled(false);
+        replyButton.setEnabled(true);
+        deleteButton.setEnabled(true);
         
         String[] ditchHtml = selectedMessage.split("<html>");
         String[] splitted = ditchHtml[1].split("<br>");
@@ -388,12 +431,15 @@ public class HomeFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_listSubjectMouseClicked
 
     private void btnComposeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnComposeActionPerformed
-        dateTextField.setText("");
+        Calendar currentDateTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        dateTextField.setText(currentDateTime.getTime().toString());
         toTextField.setText("");
-        fromTextField.setText("");
+        fromTextField.setText(username);
         subjectTextField.setText("");
         bodyTextArea.setText("");
-        sendButton.setEnabled(true);                
+        sendButton.setEnabled(true);
+        replyButton.setEnabled(false);
+        deleteButton.setEnabled(false);
     }//GEN-LAST:event_btnComposeActionPerformed
 
     private void subjectTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_subjectTextFieldActionPerformed
@@ -421,19 +467,57 @@ public class HomeFrame extends javax.swing.JFrame {
             messagePassing += subject;
             messagePassing += "<br>";
             messagePassing += body;
-            
+                        
             messagePassing += "<pushfile>";
             
-            out.printf("%s", messagePassing);
+            System.out.println("pusing file to server");
+            out.println("" + messagePassing);
+            System.out.println("done pushing");
             
             dateTextField.setText("");
             toTextField.setText("");
             fromTextField.setText("");
             subjectTextField.setText("");
             bodyTextArea.setText("");
-            sendButton.setEnabled(true);
+            sendButton.setEnabled(false);
+            replyButton.setEnabled(false);
+            deleteButton.setEnabled(false);
         }
     }//GEN-LAST:event_sendButtonActionPerformed
+
+    private void replyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_replyButtonActionPerformed
+        sendButton.setEnabled(true);
+        replyButton.setEnabled(false);
+        deleteButton.setEnabled(false);
+        
+        Calendar currentDateTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        dateTextField.setText(currentDateTime.getTime().toString());
+        
+        String swap = toTextField.getText();
+        toTextField.setText(fromTextField.getText());
+        fromTextField.setText(swap);
+        
+        if(!subjectTextField.getText().contains("Re:")){
+            subjectTextField.setText(String.format("Re:%s", subjectTextField.getText()));
+        }
+        
+        bodyTextArea.setText("");
+    }//GEN-LAST:event_replyButtonActionPerformed
+
+    private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
+        if(isInInbox){
+            String messagePassing = dateTextField.getText();
+            messagePassing += ".xml";
+            messagePassing += "<deletefileinbox>";
+            out.println("" + messagePassing);
+        }
+        else if(isInSent){
+            String messagePassing = dateTextField.getText();
+            messagePassing += ".xml";
+            messagePassing += "<deletefilesent>";
+            out.println("" + messagePassing);
+        }
+    }//GEN-LAST:event_deleteButtonActionPerformed
 
     /*
     public static void main(String args[]) {     
@@ -466,6 +550,7 @@ public class HomeFrame extends javax.swing.JFrame {
     private javax.swing.JTextArea bodyTextArea;
     private javax.swing.JButton btnCompose;
     private javax.swing.JTextField dateTextField;
+    private javax.swing.JButton deleteButton;
     private javax.swing.JTextField fromTextField;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
@@ -479,6 +564,7 @@ public class HomeFrame extends javax.swing.JFrame {
     private javax.swing.JList listSubject;
     private javax.swing.JPanel panelContent;
     private javax.swing.JPanel panelHome;
+    private javax.swing.JButton replyButton;
     private javax.swing.JButton sendButton;
     private javax.swing.JScrollPane spSubject;
     private javax.swing.JTextField subjectTextField;

@@ -15,6 +15,7 @@ public class RrdsClient {
     private static String serverResponse;
     private static LoginDialog ldialog;
     private static HomeFrame hframe;
+    private static String username;
     
     public static void main(String[] args) throws IOException {
         ldialog = new LoginDialog(null, true);
@@ -24,12 +25,13 @@ public class RrdsClient {
         clientSocket = ldialog.getSocket();
         in = ldialog.getBufferedReader();
         out = ldialog.getPrintWriter();
+        username = ldialog.getUserName();
         
         if(clientSocket != null && in != null && out != null) {
             JOptionPane.showMessageDialog(null,
                 "You have successfully logged in!");
             
-            hframe = new HomeFrame(clientSocket);
+            hframe = new HomeFrame(clientSocket, username);
             hframe.setDefaultCloseOperation(HomeFrame.DISPOSE_ON_CLOSE);
             hframe.setVisible(true);
         }

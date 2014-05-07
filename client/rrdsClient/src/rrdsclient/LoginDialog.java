@@ -203,6 +203,10 @@ public class LoginDialog extends javax.swing.JDialog {
         return (loginValid) ? out : null;
     }
     
+    public String getUserName(){
+        return username;
+    }
+    
     /**
      * @param args the command line arguments
      */
