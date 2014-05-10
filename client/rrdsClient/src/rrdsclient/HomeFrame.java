@@ -112,7 +112,7 @@ public class HomeFrame extends javax.swing.JFrame {
         tbHome.add(lblName);
 
         listFolder.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Inbox", "Sent", " " };
+            String[] strings = { "Inbox", "Sent" };
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
@@ -328,6 +328,10 @@ public class HomeFrame extends javax.swing.JFrame {
                 break;
         }
         
+        populateEmailList();
+    }//GEN-LAST:event_listFolderMouseClicked
+    
+    private void populateEmailList() {
         // Get the number of files from server
         try {
             response = in.readLine();
@@ -388,8 +392,8 @@ public class HomeFrame extends javax.swing.JFrame {
             sb.setLength(0);
         } // forloop end
         listSubject.setModel(listModel);
-    }//GEN-LAST:event_listFolderMouseClicked
-
+    }
+    
     private void listSubjectMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_listSubjectMouseClicked
         String selectedMessage = listSubject.getSelectedValue().toString();
         StringTokenizer splitter; //tokenizer
@@ -505,18 +509,31 @@ public class HomeFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_replyButtonActionPerformed
 
     private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
-        if(isInInbox){
-            String messagePassing = dateTextField.getText();
-            messagePassing += ".xml";
+        String messagePassing = dateTextField.getText();
+        messagePassing += ".xml";
+        
+        if(isInInbox) {
             messagePassing += "<deletefileinbox>";
             out.println("" + messagePassing);
+            
+            // Refresh list
+            out.println("getinbox");
+            populateEmailList();
         }
-        else if(isInSent){
-            String messagePassing = dateTextField.getText();
-            messagePassing += ".xml";
+        else if(isInSent) {
             messagePassing += "<deletefilesent>";
             out.println("" + messagePassing);
+            
+            // Refresh list
+            out.println("getsent");
+            populateEmailList();
         }
+        
+        dateTextField.setText("");
+        toTextField.setText("");
+        fromTextField.setText("");
+        subjectTextField.setText("");
+        bodyTextArea.setText("");
     }//GEN-LAST:event_deleteButtonActionPerformed
 
     /*
