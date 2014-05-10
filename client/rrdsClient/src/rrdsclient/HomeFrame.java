@@ -1,4 +1,4 @@
-//package rrdsclient;
+package rrdsclient;
 
 import java.io.*;
 import java.net.*;
@@ -47,6 +47,7 @@ public class HomeFrame extends javax.swing.JFrame {
             initComponents();
             initVariables();
             username = usernameIn;
+            lblName.setText(username);
             replyButton.setEnabled(false);
             sendButton.setEnabled(false);
             deleteButton.setEnabled(false);
@@ -54,13 +55,6 @@ public class HomeFrame extends javax.swing.JFrame {
         catch (IOException e) {
             System.out.println("inithome failed");
         }
-    }
-    private void hideLabels() {
-        lblFrom.setText("");
-        lblTo.setText("");
-        lblSubject.setText("");
-        lblDate.setText("");
-        lblBody.setText("");
     }
     
     private void initVariables() {
@@ -81,6 +75,8 @@ public class HomeFrame extends javax.swing.JFrame {
 
         jSeparator2 = new javax.swing.JSeparator();
         tbHome = new javax.swing.JToolBar();
+        jLabel1 = new javax.swing.JLabel();
+        lblName = new javax.swing.JLabel();
         panelHome = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         listFolder = new javax.swing.JList();
@@ -109,8 +105,14 @@ public class HomeFrame extends javax.swing.JFrame {
 
         tbHome.setRollover(true);
 
+        jLabel1.setText("   Welcome, ");
+        tbHome.add(jLabel1);
+
+        lblName.setText("Lastname");
+        tbHome.add(lblName);
+
         listFolder.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Inbox", "Sent", "Trash" };
+            String[] strings = { "Inbox", "Sent", " " };
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
@@ -247,11 +249,12 @@ public class HomeFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(panelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(sendButton)
-                    .addComponent(replyButton)
+                .addGroup(panelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnCompose)
-                    .addComponent(deleteButton)))
+                    .addComponent(deleteButton)
+                    .addGroup(panelContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(sendButton)
+                        .addComponent(replyButton))))
         );
 
         javax.swing.GroupLayout panelHomeLayout = new javax.swing.GroupLayout(panelHome);
@@ -319,9 +322,6 @@ public class HomeFrame extends javax.swing.JFrame {
                 out.println("getsent");
                 isInInbox = false;
                 isInSent = true;
-                break;
-            case 2:
-                out.println("gettrash");
                 break;
             default:
                 out.println("noreq");
@@ -552,12 +552,14 @@ public class HomeFrame extends javax.swing.JFrame {
     private javax.swing.JTextField dateTextField;
     private javax.swing.JButton deleteButton;
     private javax.swing.JTextField fromTextField;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JLabel lblBody;
     private javax.swing.JLabel lblDate;
     private javax.swing.JLabel lblFrom;
+    private javax.swing.JLabel lblName;
     private javax.swing.JLabel lblSubject;
     private javax.swing.JLabel lblTo;
     private javax.swing.JList listFolder;

@@ -1,4 +1,4 @@
-//package rrdsclient;
+package rrdsclient;
 
 import java.io.*;
 import java.net.Socket;
@@ -10,7 +10,6 @@ public class RrdsClient {
     private static Socket clientSocket;
     private static BufferedReader in;
     private static PrintWriter out;
-    private static final int[] fileNum = new int[REMOTEFOLDER];
     private static String incomingMessage;
     private static String serverResponse;
     private static LoginDialog ldialog;
