@@ -144,7 +144,7 @@ public class ClientThread extends Thread{
                System.out.println("waiting for client . . .");
                tempStr = incomingMessage.readLine();
                System.out.printf("request = %s\n", tempStr);
-               while(!tempStr.equals("<exit>")){
+               while(!tempStr.equals("<exitloop>")){
                    //if request is for inbox files
                    if(tempStr.equals("getinbox")){                     
                        //send all inbox files to client
@@ -253,7 +253,7 @@ public class ClientThread extends Thread{
         String sXml = ""; 
         try {
             //remove <br> tags from message
-            String[] splitMessage = clientMessageIn.split("<br>");
+            String[] splitMessage = clientMessageIn.split("<separator>");
             
             //add xml tags between email fields
             sXml += "<xml>\n";
