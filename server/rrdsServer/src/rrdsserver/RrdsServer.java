@@ -26,7 +26,7 @@ public class RrdsServer{
     //class variables
     private static ServerSocket serverSocket; //socket used for accepting connections 
     private static Socket clientSocket; //socket used to hold client socket
-    private static ClientThread acceptThread;
+    private static ClientThread acceptThread; //thread to server multiple clients
     
     public static void main(String[] args) {    
         try{
@@ -39,6 +39,7 @@ public class RrdsServer{
                 //accept incoming connections
                 clientSocket = serverSocket.accept();
                 
+                //setup a new client thread and start it
                 acceptThread = new ClientThread(clientSocket);
                 acceptThread.start();
                 

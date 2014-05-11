@@ -1,4 +1,4 @@
-package rrdsclient;
+//package rrdsclient;
 
 import java.io.*;
 import java.net.*;
@@ -20,19 +20,19 @@ import javax.swing.JOptionPane;
  * @author dariusstephen
  */
 public class HomeFrame extends javax.swing.JFrame {
-    private Socket socket;
-    private BufferedReader in;
-    private PrintWriter out;
-    private String response;
-    private int filenum;
-    private DateFormat df;
-    private SimpleDateFormat sf;
-    private StringBuilder sb;
-    private Date emaildate;
-    private DefaultListModel listModel;
-    private String username;
-    private boolean isInInbox;
-    private boolean isInSent;
+    private Socket socket; //client socket
+    private BufferedReader in; //socket input stream
+    private PrintWriter out; //socket output stream
+    private String response; //string that holds messages from server
+    private int filenum; //file number
+    private DateFormat df; //date format
+    private SimpleDateFormat sf; //date format
+    private StringBuilder sb; //string builder
+    private Date emaildate; //email date
+    private DefaultListModel listModel; //lisa model
+    private String username; //username
+    private boolean isInInbox; //flag to determine if user is viewing inbox
+    private boolean isInSent; //flag to determine if user is viewing sent
     
     /**
      * Creates new form HomeFrame
@@ -41,16 +41,16 @@ public class HomeFrame extends javax.swing.JFrame {
     
     public HomeFrame(Socket socketIn, String usernameIn) {
         try {
-            socket = socketIn;
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out = new PrintWriter(socket.getOutputStream(), true);
-            initComponents();
-            initVariables();
-            username = usernameIn;
-            lblName.setText(username);
-            replyButton.setEnabled(false);
-            sendButton.setEnabled(false);
-            deleteButton.setEnabled(false);
+            socket = socketIn; //get socket
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream())); //get input stream
+            out = new PrintWriter(socket.getOutputStream(), true); //get output stream
+            initComponents(); //initialize gui
+            initVariables(); //initialize class variables
+            username = usernameIn; //get username
+            lblName.setText(username); //set the welcome label to username
+            replyButton.setEnabled(false); //disable reply button
+            sendButton.setEnabled(false); //disable send button
+            deleteButton.setEnabled(false); //disable delete button
         } 
         catch (IOException e) {
             System.out.println("inithome failed");
@@ -102,6 +102,11 @@ public class HomeFrame extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(45, 51, 56));
         setMinimumSize(new java.awt.Dimension(670, 450));
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
+            }
+        });
 
         tbHome.setRollover(true);
 
@@ -308,17 +313,31 @@ public class HomeFrame extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    //event for clicking either "inbox" or "sent"
     private void listFolderMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_listFolderMouseClicked
         // TODO add your handling code here:
+        //disable text fields
+        dateTextField.setEditable(false);
+        toTextField.setEditable(false);
+        fromTextField.setEditable(false);
+        subjectTextField.setEditable(false);
+        bodyTextArea.setEditable(false);
+        
+        //get the index of the selected folder
         int currentIndex = listFolder.getSelectedIndex();
         
+        //check which folder the user clicked
         switch(currentIndex) {
+            //inbox
             case 0:
+                //send a getinbox request to the server
                 out.println("getinbox");
                 isInInbox = true;
                 isInSent = false;
                 break;
+            //sent
             case 1:
+                //send a getsent request to the server
                 out.println("getsent");
                 isInInbox = false;
                 isInSent = true;
@@ -331,6 +350,7 @@ public class HomeFrame extends javax.swing.JFrame {
         populateEmailList();
     }//GEN-LAST:event_listFolderMouseClicked
     
+    //method to display all emails in the email list
     private void populateEmailList() {
         // Get the number of files from server
         try {
@@ -394,24 +414,37 @@ public class HomeFrame extends javax.swing.JFrame {
         listSubject.setModel(listModel);
     }
     
+    //event that is called when clicking an email
     private void listSubjectMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_listSubjectMouseClicked
-        String selectedMessage = listSubject.getSelectedValue().toString();
-        StringTokenizer splitter; //tokenizer
+        //disable all text fields
+        dateTextField.setEditable(false);
+        toTextField.setEditable(false);
+        fromTextField.setEditable(false);
+        subjectTextField.setEditable(false);
+        bodyTextArea.setEditable(false);
         
+        //get the selected email
+        String selectedMessage = listSubject.getSelectedValue().toString();
+        
+        //set text fields to empty
         dateTextField.setText("");
         toTextField.setText("");
         fromTextField.setText("");
         subjectTextField.setText("");
         bodyTextArea.setText("");
+        
+        //disable send, reply, and delete button
         sendButton.setEnabled(false);
         replyButton.setEnabled(true);
         deleteButton.setEnabled(true);
         
+        //remove the <html> tags and then <br> tags in email
         String[] ditchHtml = selectedMessage.split("<html>");
         String[] splitted = ditchHtml[1].split("<br>");
         
         bodyTextArea.setText(selectedMessage);
         
+        //for loop to set date, to, from, subject, and body text fields
         for(int i = 0; i < 5; i++)
         {
             switch(i){
@@ -434,13 +467,26 @@ public class HomeFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_listSubjectMouseClicked
 
+    //compose button event
     private void btnComposeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnComposeActionPerformed
+        //enable text fields
+        dateTextField.setEditable(true);
+        toTextField.setEditable(true);
+        fromTextField.setEditable(true);
+        subjectTextField.setEditable(true);
+        bodyTextArea.setEditable(true);
+        
+        //get current date and assign to date
         Calendar currentDateTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         dateTextField.setText(currentDateTime.getTime().toString());
+        
+        //set text fields to default values
         toTextField.setText("");
         fromTextField.setText(username);
         subjectTextField.setText("");
         bodyTextArea.setText("");
+        
+        //enable send button and disable reply and delete
         sendButton.setEnabled(true);
         replyButton.setEnabled(false);
         deleteButton.setEnabled(false);
@@ -450,7 +496,16 @@ public class HomeFrame extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_subjectTextFieldActionPerformed
 
+    //send button event
     private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendButtonActionPerformed
+        //disable all text fields
+        dateTextField.setEditable(false);
+        toTextField.setEditable(false);
+        fromTextField.setEditable(false);
+        subjectTextField.setEditable(false);
+        bodyTextArea.setEditable(false);
+        
+        //get all the strings from the separate fields
         String date = dateTextField.getText();
         String to = toTextField.getText();
         String from = fromTextField.getText();
@@ -458,10 +513,13 @@ public class HomeFrame extends javax.swing.JFrame {
         String body = bodyTextArea.getText();
         String messagePassing = "";
         
+        //if any of the fields are empty
         if(date.equals("") || to.equals("") || from.equals("") || subject.equals("") || body.equals("")){
-            System.out.println("missing field");
+            //show error dialog
+            JOptionPane.showMessageDialog(this, "Missing Field(s)");
         }
         else{
+            //add <br> tag between message fields
             messagePassing += date;
             messagePassing += "<br>";
             messagePassing += to;
@@ -471,13 +529,14 @@ public class HomeFrame extends javax.swing.JFrame {
             messagePassing += subject;
             messagePassing += "<br>";
             messagePassing += body;
-                        
+
+            //append the <pushfile> command to the message
             messagePassing += "<pushfile>";
             
-            System.out.println("pusing file to server");
+            //send formatted message to server
             out.println("" + messagePassing);
-            System.out.println("done pushing");
             
+            //reset text fields
             dateTextField.setText("");
             toTextField.setText("");
             fromTextField.setText("");
@@ -489,30 +548,61 @@ public class HomeFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_sendButtonActionPerformed
 
+    //reply button event
     private void replyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_replyButtonActionPerformed
+        //enable all text fields
+        dateTextField.setEditable(true);
+        toTextField.setEditable(true);
+        fromTextField.setEditable(true);
+        subjectTextField.setEditable(true);
+        bodyTextArea.setEditable(true);
         sendButton.setEnabled(true);
         replyButton.setEnabled(false);
         deleteButton.setEnabled(false);
         
-        Calendar currentDateTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        dateTextField.setText(currentDateTime.getTime().toString());
-        
-        String swap = toTextField.getText();
-        toTextField.setText(fromTextField.getText());
-        fromTextField.setText(swap);
-        
-        if(!subjectTextField.getText().contains("Re:")){
-            subjectTextField.setText(String.format("Re:%s", subjectTextField.getText()));
+        //if the user is currently in inbox
+        if(isInInbox){
+            //get current time
+            Calendar currentDateTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            dateTextField.setText(currentDateTime.getTime().toString());
+
+            //swap the to and from fields
+            String swap = toTextField.getText();
+            toTextField.setText(fromTextField.getText());
+            fromTextField.setText(swap);
+
+            //if the current subject does not contain Re: then add it
+            if(!subjectTextField.getText().contains("Re:")){
+                subjectTextField.setText(String.format("Re:%s", subjectTextField.getText()));
+            }
+
+            //set body to empty
+            bodyTextArea.setText("");
         }
-        
-        bodyTextArea.setText("");
+        else{
+            //get the current time
+            Calendar currentDateTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            dateTextField.setText(currentDateTime.getTime().toString());
+
+            //if the current subject does not contain Re: then add it
+            if(!subjectTextField.getText().contains("Re:")){
+                subjectTextField.setText(String.format("Re:%s", subjectTextField.getText()));
+            }
+
+            //set body to empty
+            bodyTextArea.setText("");
+        }
     }//GEN-LAST:event_replyButtonActionPerformed
 
+    //delete button event
     private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
+        //setup the filename to pass to the server
         String messagePassing = dateTextField.getText();
         messagePassing += ".xml";
         
+        //if the user is currently in inbox
         if(isInInbox) {
+            //add <deletefileinbox> command to message and pass message to server
             messagePassing += "<deletefileinbox>";
             out.println("" + messagePassing);
             
@@ -520,7 +610,9 @@ public class HomeFrame extends javax.swing.JFrame {
             out.println("getinbox");
             populateEmailList();
         }
+        //if the user is currently in sent
         else if(isInSent) {
+            //add <deletefilesent> command to message and pass message to server
             messagePassing += "<deletefilesent>";
             out.println("" + messagePassing);
             
@@ -529,12 +621,27 @@ public class HomeFrame extends javax.swing.JFrame {
             populateEmailList();
         }
         
+        //set text fields to empty
         dateTextField.setText("");
         toTextField.setText("");
         fromTextField.setText("");
         subjectTextField.setText("");
         bodyTextArea.setText("");
     }//GEN-LAST:event_deleteButtonActionPerformed
+
+    //closed window event
+    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+        // TODO add your handling code here:
+        //send <exit> command to server
+        out.println("<exit>");
+        try {
+            //close socket
+            socket.close();
+        } 
+        catch (IOException ex) {
+            Logger.getLogger(HomeFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_formWindowClosed
 
     /*
     public static void main(String args[]) {     

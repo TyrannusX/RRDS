@@ -19,6 +19,8 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.net.Socket;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,47 +38,35 @@ public class ClientThread extends Thread{
     private Socket thrdSocket;
     private BufferedReader incomingMessage; //input stream to get client data
     private PrintWriter outgoingMessage; //output stream to client
-    private PrintWriter writeClientMessage;
+    private PrintWriter writeClientMessage; //used to write to a file
     private StringTokenizer splitter; //tokenizer
     private FileReader myFile; //file reader to read in credentials, inbox, outbox, etc
-    private Element xmlElement; //xml element
     private DocumentBuilderFactory xmlFactory; //xml factory
     private DocumentBuilder xmlBuilder; //xml builder
-    private InputSource xmlSource; //xml source
-    private StringReader xmlReader; //xml reader
     private Document xmlDoc; //xml document
-    private FileOutputStream serializeOutputStream;
-    private FileInputStream serializeInputStream;
-    private ObjectOutputStream serializeObjectOutputStream;
-    private ObjectInputStream serializeObjectInputStream;
 
     public ClientThread(Socket socketIn){
+        //get socket
         thrdSocket = socketIn;
     }
 
     @Override
     public void run(){
         //declare variables
-        int credentialCounter = 0;
-        boolean usernameVerified = false;
-        boolean passwordVerified = false;
-        String credentialStr = "";
-        String tempStr = "";
+        int credentialCounter = 0; //counter for separating username and password checks
+        boolean usernameVerified = false; //username flag
+        boolean passwordVerified = false; //password flag
+        String credentialStr = ""; //credential string from client
+        String tempStr = ""; //temp string for quick stuff
         String username; //client username
         String password; //client password
-        String sPath = "";
-        String sInboxPath = "";
-        String sSentPath = "";
-        String sTrashPath = "";
-        File inbox;
-        File[] inboxFiles;
-        File sent;
-        File[] sentFiles;
-        File trash;
-        File[] trashFiles;
-        String sInbox = "";
-        String sSent = "";
-        String sTrash = "";
+        String sPath = ""; //formatted path string
+        File inbox; //inbox path
+        File[] inboxFiles; //inbox files
+        File sent; //sent path
+        File[] sentFiles; //sent files
+        File trash; //trash path 
+        File[] trashFiles; //trash files
         String sClientMessage = "";
         
         try{
@@ -150,14 +140,16 @@ public class ClientThread extends Thread{
                sPath = String.format("users/%s/trash", username);
                trash = new File(sPath);
                
+               //loop and serve client until they exit
                System.out.println("waiting for client . . .");
                tempStr = incomingMessage.readLine();
-               System.out.printf("request = %s", tempStr);
-               while(!tempStr.equals("exit")){
+               System.out.printf("request = %s\n", tempStr);
+               while(!tempStr.equals("<exit>")){
                    //if request is for inbox files
                    if(tempStr.equals("getinbox")){                     
                        //send all inbox files to client
                        inboxFiles = inbox.listFiles();
+                       Arrays.sort(inboxFiles, Collections.reverseOrder());
 		       outgoingMessage.printf("%d\n", inboxFiles.length);
                        for(int i = 0; i < inboxFiles.length; i++){
                            outgoingMessage.printf("%s", getRequestedFile(inboxFiles[i]));
@@ -167,6 +159,7 @@ public class ClientThread extends Thread{
                    else if(tempStr.equals("getsent")){
                        //send all sent files to client
                        sentFiles = sent.listFiles();
+                       Arrays.sort(sentFiles, Collections.reverseOrder());
                        outgoingMessage.printf("%d\n", sentFiles.length);
                        for(int i = 0; i < sentFiles.length; i++){
                            outgoingMessage.printf("%s", getRequestedFile(sentFiles[i]));
@@ -176,6 +169,7 @@ public class ClientThread extends Thread{
                    else if(tempStr.equals("gettrash")){
                        //send all trash files to client
                        trashFiles = trash.listFiles();
+                       Arrays.sort(trashFiles, Collections.reverseOrder());
                        outgoingMessage.printf("%d\n", trashFiles.length);
                        for(int i = 0; i < trashFiles.length; i++){
                            outgoingMessage.printf("%s", getRequestedFile(trashFiles[i]));
@@ -183,40 +177,48 @@ public class ClientThread extends Thread{
                    }
                    //push message to server
                    else if(tempStr.contains("<pushfile>")){
+                       //pull <pushfile> from the message string
                        String[] clientArray = tempStr.split("<pushfile>");
                        sClientMessage = clientArray[0];
+                       //save message to server
                        pushMessage(sClientMessage, username);
                    }
                    //delete file from server
                    else if(tempStr.contains("<deletefileinbox>")){
+                       //pull <deletefileinbox> from the message string
                        String[] clientArray = tempStr.split("<deletefileinbox>");
                        sClientMessage = clientArray[0];
+                       //delete message from server
                        deleteFileFromInbox(sClientMessage, username);
                    }
                    else if(tempStr.contains("<deletefilesent>")){
+                       //pull <deletefilesent> from the message string
                        String[] clientArray = tempStr.split("<deletefilesent>");
                        sClientMessage = clientArray[0];
+                       //delete message from server
                        deleteFileFromSent(sClientMessage, username);
                    }
                    
+                   //get request message from client
                    System.out.println("waiting for client . . .");
                    tempStr = incomingMessage.readLine();
-                   System.out.printf("request = %s", tempStr);
+                   System.out.printf("request = %s\n", tempStr);
                }
            }
            else
            {
                outgoingMessage.println("INTRUDER ALERT");
            }
+           //close socket
+           thrdSocket.close();
+           System.out.println("thrdSocket closed");
         }
         catch(Exception e){
-            if(thrdSocket == null){
-                System.out.println("the socket is null");
-            }
             System.out.println("Thread failed");
         }
     }
     
+    //method to parse xml file from server
     public String getRequestedFile(File fileName){
         String sFormat = "";
         
@@ -226,6 +228,7 @@ public class ClientThread extends Thread{
             xmlBuilder = xmlFactory.newDocumentBuilder();
             xmlDoc = xmlBuilder.parse(fileName);
 
+            //parse the email from xml
             xmlDoc.getDocumentElement().normalize();
             sFormat = xmlDoc.getElementsByTagName("datetime").item(0).getTextContent();
             sFormat += "\n";
@@ -244,11 +247,15 @@ public class ClientThread extends Thread{
         return sFormat;
     }
     
+    //method to save message to server
     public void pushMessage(String clientMessageIn, String username){
+        //string to hold xml
         String sXml = ""; 
         try {
+            //remove <br> tags from message
             String[] splitMessage = clientMessageIn.split("<br>");
             
+            //add xml tags between email fields
             sXml += "<xml>\n";
             for(int i = 0; i < 5; i++){
                 switch(i){
@@ -279,34 +286,39 @@ public class ClientThread extends Thread{
                         break;    
                 }                                             
             }
+            //add closing xml tag
             sXml += "</xml>\n";
             
+            //save message to client's sent directory
             String sPath = String.format("users/%s/sent/%s.xml", username, splitMessage[0]);
             File tempFile = new File(sPath);
             writeClientMessage = new PrintWriter(tempFile);
             writeClientMessage.printf("%s", sXml);
             writeClientMessage.close();
             
+            //save message to receiving clients inbox directory
             sPath = String.format("users/%s/inbox/%s.xml", splitMessage[1], splitMessage[0]);
             tempFile = new File(sPath);
             writeClientMessage = new PrintWriter(tempFile);
             writeClientMessage.printf("%s", sXml);
             writeClientMessage.close();
-            
-            System.out.println("done writing file");
         } 
         catch (FileNotFoundException ex) {
             Logger.getLogger(ClientThread.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
+    //method to delete file from inbox
     public void deleteFileFromInbox(String clientMessageIn, String username){
+        //delete requested file
         String sPath = String.format("users/%s/inbox/%s", username, clientMessageIn);
         File tempFile = new File(sPath);
         tempFile.delete();
     }
     
+    //method to delete file from sent
     public void deleteFileFromSent(String clientMessageIn, String username){
+        //delete requested file
         String sPath = String.format("users/%s/sent/%s", username, clientMessageIn);
         File tempFile = new File(sPath);
         tempFile.delete();

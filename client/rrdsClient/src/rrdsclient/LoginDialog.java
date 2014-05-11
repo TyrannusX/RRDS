@@ -1,4 +1,4 @@
-package rrdsclient;
+//package rrdsclient;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -131,16 +131,17 @@ public class LoginDialog extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private static Socket clientSocket;
-    private static final String domainName = "localhost";
-    private static final int portNumber = 9999;
-    private static BufferedReader in;
-    private static PrintWriter out;
-    private static String serverResponse;
-    private static String username;
-    private static String password;
-    private static boolean loginValid = false;
+    private static Socket clientSocket; //client socket
+    private static final String domainName = "localhost"; //hostname
+    private static final int portNumber = 9999; //port number
+    private static BufferedReader in; //socket input stream
+    private static PrintWriter out; //socket output stream
+    private static String serverResponse; //string that holds messages from server
+    private static String username; //username
+    private static String password; //password
+    private static boolean loginValid = false; //flag to determine if login was successful
     
+    //event handler for login button
     private void btnConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConnectActionPerformed
         // Establish connection to server
         try {
@@ -171,8 +172,10 @@ public class LoginDialog extends javax.swing.JDialog {
             // Get and check server response for login
             serverResponse = in.readLine();
             
+            //determine if login info is correct
             loginValid = (serverResponse.equals("welcome " + username + "!"));
             
+            //if login was not successful
             if(!loginValid) {
                 // Login is not valid
                 lblError.setText("Invalid username or password");
