@@ -35,16 +35,12 @@ public class RrdsServer{
 
             //while loop to run server
             while(true){
-                System.out.println("Server loop start");
                 //accept incoming connections
                 clientSocket = serverSocket.accept();
                 
                 //setup a new client thread and start it
                 acceptThread = new ClientThread(clientSocket);
                 acceptThread.start();
-                
-                //close server socket
-                System.out.println("Server loop end");
             }
         }
         catch(Exception e){

@@ -44,6 +44,8 @@ public class ClientThread extends Thread{
     private DocumentBuilderFactory xmlFactory; //xml factory
     private DocumentBuilder xmlBuilder; //xml builder
     private Document xmlDoc; //xml document
+    private String[] userArr;
+    private String[] passwordArr;
 
     public ClientThread(Socket socketIn){
         //get socket
@@ -88,7 +90,6 @@ public class ClientThread extends Thread{
            //setup file stream to verify credentials
            myFile = new FileReader("credentials.txt");
            BufferedReader bReader = new BufferedReader(myFile);
-           String[] credentialArr;
            int passIndex = 0;
 
            //loop through the file to get credentials and verify
@@ -97,9 +98,9 @@ public class ClientThread extends Thread{
                //check the user name
                if(credentialCounter == 0)
                {
-                   credentialArr = credentialStr.split(" ");
-                   for(int i = 0; i < credentialArr.length; i++){
-                        if(username.equals(credentialArr[i]))
+                   userArr = credentialStr.split(" ");
+                   for(int i = 0; i < userArr.length; i++){
+                        if(username.equals(userArr[i]))
                         {
                             usernameVerified = true;
                             passIndex = i;
@@ -110,8 +111,8 @@ public class ClientThread extends Thread{
                //check the password
                else if(credentialCounter == 1)
                {
-                   credentialArr = credentialStr.split(" ");
-                   if(password.equals(credentialArr[passIndex]))
+                   passwordArr = credentialStr.split(" ");
+                   if(password.equals(passwordArr[passIndex]))
                    {
                        passwordVerified = true;
                    }
@@ -141,9 +142,7 @@ public class ClientThread extends Thread{
                trash = new File(sPath);
                
                //loop and serve client until they exit
-               System.out.println("waiting for client . . .");
-               tempStr = incomingMessage.readLine();
-               System.out.printf("request = %s\n", tempStr);
+               tempStr = incomingMessage.readLine(); 
                while(!tempStr.equals("<exitloop>")){
                    //if request is for inbox files
                    if(tempStr.equals("getinbox")){                     
@@ -200,9 +199,7 @@ public class ClientThread extends Thread{
                    }
                    
                    //get request message from client
-                   System.out.println("waiting for client . . .");
                    tempStr = incomingMessage.readLine();
-                   System.out.printf("request = %s\n", tempStr);
                }
            }
            else
@@ -211,7 +208,6 @@ public class ClientThread extends Thread{
            }
            //close socket
            thrdSocket.close();
-           System.out.println("thrdSocket closed");
         }
         catch(Exception e){
             System.out.println("Thread failed");
@@ -252,7 +248,7 @@ public class ClientThread extends Thread{
         //string to hold xml
         String sXml = ""; 
         try {
-            //remove <br> tags from message
+            //remove <separator> tags from message
             String[] splitMessage = clientMessageIn.split("<separator>");
             
             //add xml tags between email fields
@@ -296,12 +292,21 @@ public class ClientThread extends Thread{
             writeClientMessage.printf("%s", sXml);
             writeClientMessage.close();
             
-            //save message to receiving clients inbox directory
-            sPath = String.format("users/%s/inbox/%s.xml", splitMessage[1], splitMessage[0]);
-            tempFile = new File(sPath);
-            writeClientMessage = new PrintWriter(tempFile);
-            writeClientMessage.printf("%s", sXml);
-            writeClientMessage.close();
+            //check if receiving client exists
+            boolean userDoesExist = false;
+            for(int i = 0; i < userArr.length; i++){
+                if(userArr[i].equals(splitMessage[1])){
+                    userDoesExist = true;
+                }
+            }
+            if(userDoesExist){
+                //save message to receiving clients inbox directory
+                sPath = String.format("users/%s/inbox/%s.xml", splitMessage[1], splitMessage[0]);
+                tempFile = new File(sPath);
+                writeClientMessage = new PrintWriter(tempFile);
+                writeClientMessage.printf("%s", sXml);
+                writeClientMessage.close();
+            }
         } 
         catch (FileNotFoundException ex) {
             Logger.getLogger(ClientThread.class.getName()).log(Level.SEVERE, null, ex);

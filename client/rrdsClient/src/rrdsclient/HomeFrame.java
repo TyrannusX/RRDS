@@ -520,9 +520,7 @@ public class HomeFrame extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Missing Field(s)");
         }
         else{
-            System.out.printf("%s", body);
             if(body.contains("\n")){
-                System.out.println("NEWLINE FOUND");
                 String[] ditchNewline = body.split("\n");
                 body = "";
                 for(int i = 0; i < ditchNewline.length; i++){
