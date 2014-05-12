@@ -1,10 +1,10 @@
+//PROGRAMMERS: Robert Reyes and Darius Stephen
+//Source: http://www.mkyong.com/java/how-to-read-xml-file-in-java-dom-parser/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
-//package rrdsserver;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -67,8 +67,6 @@ public class ClientThread extends Thread{
         File[] inboxFiles; //inbox files
         File sent; //sent path
         File[] sentFiles; //sent files
-        File trash; //trash path 
-        File[] trashFiles; //trash files
         String sClientMessage = "";
         
         try{
@@ -137,10 +135,6 @@ public class ClientThread extends Thread{
                sPath = String.format("users/%s/sent", username);
                sent = new File(sPath);
                
-               //get the trash directory
-               sPath = String.format("users/%s/trash", username);
-               trash = new File(sPath);
-               
                //loop and serve client until they exit
                tempStr = incomingMessage.readLine(); 
                while(!tempStr.equals("<exitloop>")){
@@ -162,16 +156,6 @@ public class ClientThread extends Thread{
                        outgoingMessage.printf("%d\n", sentFiles.length);
                        for(int i = 0; i < sentFiles.length; i++){
                            outgoingMessage.printf("%s", getRequestedFile(sentFiles[i]));
-                       }
-                   }
-                   //if request is for trash files
-                   else if(tempStr.equals("gettrash")){
-                       //send all trash files to client
-                       trashFiles = trash.listFiles();
-                       Arrays.sort(trashFiles, Collections.reverseOrder());
-                       outgoingMessage.printf("%d\n", trashFiles.length);
-                       for(int i = 0; i < trashFiles.length; i++){
-                           outgoingMessage.printf("%s", getRequestedFile(trashFiles[i]));
                        }
                    }
                    //push message to server

@@ -1,4 +1,4 @@
-//package rrdsclient;
+//PROGRAMMERS: Robert Reyes and Darius Stephen
 
 import java.io.*;
 import java.net.Socket;

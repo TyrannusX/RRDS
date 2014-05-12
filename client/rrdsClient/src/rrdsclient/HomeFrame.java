@@ -1,4 +1,4 @@
-//package rrdsclient;
+//PROGRAMMERS: Robert Reyes and Darius Stephen
 
 import java.io.*;
 import java.net.*;
@@ -324,6 +324,8 @@ public class HomeFrame extends javax.swing.JFrame {
         subjectTextField.setEditable(false);
         bodyTextArea.setEditable(false);
         
+        deleteButton.setEnabled(false);
+        
         //get the index of the selected folder
         int currentIndex = listFolder.getSelectedIndex();
         
@@ -647,6 +649,8 @@ public class HomeFrame extends javax.swing.JFrame {
         fromTextField.setText("");
         subjectTextField.setText("");
         bodyTextArea.setText("");
+        
+        deleteButton.setEnabled(false);
     }//GEN-LAST:event_deleteButtonActionPerformed
 
     //closed window event
